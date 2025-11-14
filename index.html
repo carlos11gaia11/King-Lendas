@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio de Cartas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('logo.png');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            opacity: 1.15;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 95%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #000000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #FFD700;
+        }
+
+        h1 {
+            color: #000000;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #555;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            width: 120px;
+            height: 150px;
+            background-color: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0) 50%);
+        }
+
+        .card.selected {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: #FFD700;
+            background-color: #FFF9C4;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .card-name {
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            font-size: 0.8rem;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 3px 0;
+        }
+
+        .result-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 10px;
+            transition: all 0.5s ease;
+            text-align: center;
+        }
+
+        .result.highlight {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            transform: scale(1.1);
+        }
+
+        .result-image {
+            width: 180px;
+            height: 225px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #FFD700;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .result-image:hover {
+            transform: scale(1.05);
+        }
+
+        .history {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.4), transparent);
+            transition: all 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background-color: #333333;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: #FFD700;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        /* Modal para carta ampliada */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: zoomIn 0.3s ease;
+        }
+
+        .modal-image {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 3px solid #FFD700;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .close-modal:hover {
+            color: #FFD700;
+        }
+
+        @keyframes drawCard {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .draw-animation {
+            animation: drawCard 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                width: 100px;
+                height: 125px;
+                font-size: 1rem;
+            }
+            
+            .result {
+                font-size: 1.5rem;
+            }
+            
+            .result-image {
+                width: 150px;
+                height: 187px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sorteio de Cartas</h1>
+        <p class="subtitle">Clique no botão para sortear uma carta aleatória</p>
+        
+        <div class="cards-container">
+            <!-- As cartas serão geradas dinamicamente pelo JavaScript -->
+        </div>
+        
+        <div class="result-container">
+            <div class="result" id="result">Clique em "Sortear" para começar</div>
+            <img id="resultImage" class="result-image" style="display: none;">
+            <div class="history" id="history"></div>
+        </div>
+        
+        <div class="controls">
+            <div class="checkbox-container">
+                <input type="checkbox" id="noRepeat" class="checkbox">
+                <label for="noRepeat">Não repetir resultados anteriores</label>
+            </div>
+            <button id="drawButton">Sortear Carta</button>
+        </div>
+    </div>
+
+    <!-- Modal para exibir a carta em tamanho grande -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <img class="modal-image" id="modalImage" src="" alt="Carta ampliada">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const drawButton = document.getElementById('drawButton');
+            const resultElement = document.getElementById('result');
+            const resultImage = document.getElementById('resultImage');
+            const historyElement = document.getElementById('history');
+            const noRepeatCheckbox = document.getElementById('noRepeat');
+            const cardsContainer = document.querySelector('.cards-container');
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const closeModal = document.getElementById('closeModal');
+            
+            // Configuração das cartas
+            const cardData = [
+                { id: 1, name: "Cartinha 01", image: "cartinha 01.png" },
+                { id: 2, name: "Cartinha 02", image: "cartinha 02.png" },
+                { id: 3, name: "Cartinha 03", image: "cartinha 03.png" },
+                { id: 4, name: "Cartinha 04", image: "cartinha 04.png" },
+                { id: 5, name: "Cartinha 05", image: "cartinha 05.png" },
+                { id: 6, name: "Cartinha 06", image: "cartinha 06.png" },
+                { id: 7, name: "Cartinha 07", image: "cartinha 07.png" },
+                { id: 8, name: "Cartinha 08", image: "cartinha 08.png" }
+            ];
+            
+            let availableCards = [...cardData];
+            let drawnCards = [];
+            
+            // Criar as cartas na interface
+            cardData.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.dataset.id = card.id;
+                
+                cardElement.innerHTML = `
+                    <img src="${card.image}" alt="${card.name}" class="card-image">
+                    <div class="card-name">${card.name}</div>
+                `;
+                
+                cardsContainer.appendChild(cardElement);
+            });
+            
+            const cards = document.querySelectorAll('.card');
+            
+            // Evento para sortear carta
+            drawButton.addEventListener('click', function() {
+                sortearCarta();
+            });
+            
+            // Evento para abrir modal ao clicar na imagem do resultado
+            resultImage.addEventListener('click', function() {
+                modalImage.src = this.src;
+                modal.style.display = 'flex';
+            });
+            
+            // Evento para fechar modal
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Fechar modal ao clicar fora da imagem
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            function sortearCarta() {
+                // Remover destaque de todas as cartas
+                cards.forEach(card => card.classList.remove('selected'));
+                
+                // Verificar se há cartas disponíveis
+                if (availableCards.length === 0) {
+                    if (noRepeatCheckbox.checked) {
+                        resultElement.textContent = "Todas as cartas já foram sorteadas!";
+                        resultElement.classList.remove('highlight');
+                        resultImage.style.display = 'none';
+                        return;
+                    } else {
+                        // Resetar as cartas disponíveis
+                        availableCards = [...cardData];
+                        drawnCards = [];
+                    }
+                }
+                
+                // Sortear uma carta
+                const randomIndex = Math.floor(Math.random() * availableCards.length);
+                const drawnCard = availableCards[randomIndex];
+                
+                // Atualizar arrays
+                if (noRepeatCheckbox.checked) {
+                    availableCards.splice(randomIndex, 1);
+                }
+                drawnCards.push(drawnCard);
+                
+                // Atualizar a interface
+                resultElement.textContent = drawnCard.name;
+                resultElement.classList.add('highlight');
+                resultElement.classList.add('draw-animation');
+                
+                resultImage.src = drawnCard.image;
+                resultImage.alt = drawnCard.name;
+                resultImage.style.display = 'block';
+                resultImage.classList.add('draw-animation');
+                
+                // Destacar a carta sorteada
+                const selectedCard = document.querySelector(`.card[data-id="${drawnCard.id}"]`);
+                selectedCard.classList.add('selected');
+                
+                // Atualizar o histórico
+                updateHistory();
+                
+                // Remover a animação após ela terminar
+                setTimeout(() => {
+                    resultElement.classList.remove('draw-animation');
+                    resultImage.classList.remove('draw-animation');
+                }, 500);
+            }
+            
+            function updateHistory() {
+                if (drawnCards.length > 1) {
+                    historyElement.textContent = `Histórico: ${drawnCards.slice(0, -1).map(card => card.name).join(', ')}`;
+                } else {
+                    historyElement.textContent = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
