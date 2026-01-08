@@ -3,264 +3,152 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sorteio de Cartas</title>
+<title>Sorteio de Cartas - CMIM</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Animate.css -->
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background-color: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
+/* =======================
+   ZOOM DAS CARTAS
+======================= */
+.card-zoom {
     position: relative;
-}
-
-body::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: url("logo.png") center/cover no-repeat;
-    opacity: 0.15;
-    z-index: -1;
-}
-
-/* CONTAINER */
-.container {
-    max-width: 900px;
-    width: 95%;
-    background: rgba(255,255,255,0.95);
-    border-radius: 20px;
-    padding: 30px;
-    text-align: center;
-    border: 2px solid #000;
-    box-shadow: 0 10px 30px rgba(0,0,0,.15);
-    overflow: visible; /* <<< IMPORTANTE */
-}
-
-/* TITULOS */
-h1 {
-    font-size: 2.4rem;
-    margin-bottom: 10px;
-}
-
-.subtitle {
-    color: #555;
-    margin-bottom: 25px;
-}
-
-/* CARTAS */
-.cards-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.card {
-    width: 120px;
-    height: 150px;
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 10px;
-    position: relative;
-    cursor: pointer;
     z-index: 1;
-    overflow: visible;
-    transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.card:hover {
-    z-index: 999;
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgba(0,0,0,.25);
-}
-
-.card.selected {
-    border-color: #FFD700;
-    background: #FFF9C4;
-}
-
-.card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    transition: transform .3s ease;
+.card-zoom img {
+    transition: transform 0.3s ease;
     transform-origin: center center;
 }
 
-.card:hover .card-image {
+.card-zoom:hover {
+    z-index: 50;
+}
+
+.card-zoom:hover img {
     transform: scale(2.2);
 }
 
+/* =======================
+   ESCONDER TEXTO NO ZOOM
+======================= */
 .card-name {
-    position: absolute;
-    bottom: 5px;
-    width: 100%;
-    font-size: .75rem;
-    background: rgba(255,255,255,.85);
-    text-align: center;
+    transition: opacity 0.2s ease;
 }
 
-/* RESULTADO */
-.result-container {
-    margin: 25px 0;
-    padding: 20px;
-    background: #f8f8f8;
-    border-radius: 10px;
-    border: 1px solid #ddd;
+.card-zoom:hover .card-name {
+    opacity: 0;
 }
 
-.result {
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-.result.highlight {
-    color: #FFD700;
-    text-shadow: 0 0 10px rgba(255,215,0,.6);
-}
-
-.result-image {
-    width: 180px;
-    height: 225px;
-    object-fit: contain;
-    margin-top: 15px;
-    border-radius: 10px;
-    border: 2px solid #FFD700;
-    cursor: pointer;
-    transition: transform .3s ease;
-}
-
-.result-image:hover {
-    transform: scale(1.05);
-}
-
-.history {
-    margin-top: 10px;
-    color: #666;
-}
-
-/* CONTROLES */
-.controls {
-    margin-top: 20px;
-}
-
-button {
-    margin-top: 15px;
-    padding: 15px 35px;
-    font-size: 1.1rem;
-    background: #000;
-    color: #fff;
-    border-radius: 50px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all .3s ease;
-}
-
-button:hover {
-    background: #333;
-    transform: translateY(-3px);
-}
-
-/* MODAL */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.8);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    position: relative;
-}
-
-.modal-image {
-    max-width: 90vw;
-    max-height: 85vh;
-    border-radius: 15px;
-    border: 3px solid #FFD700;
-}
-
-.close-modal {
-    position: absolute;
-    top: -45px;
-    right: 0;
-    font-size: 2rem;
-    background: none;
-    color: #fff;
-    border: none;
-    cursor: pointer;
+/* Container não pode cortar o zoom */
+.cards-container {
+    overflow: visible;
 }
 </style>
 </head>
 
-<body>
+<body class="min-h-screen flex justify-center items-center bg-white relative overflow-x-hidden">
 
-<div class="container">
-    <h1>Sorteio de Cartas</h1>
-    <p class="subtitle">Clique no botão para sortear uma carta</p>
+<!-- Fundo -->
+<div class="absolute inset-0 bg-[url('logo.png')] bg-center bg-cover opacity-20 -z-10"></div>
 
-    <div class="cards-container"></div>
+<div class="max-w-5xl w-[95%] bg-white/95 rounded-2xl border-2 border-black shadow-2xl p-8">
 
-    <div class="result-container">
-        <div class="result" id="result">Clique em "Sortear"</div>
-        <img id="resultImage" class="result-image" style="display:none">
-        <div class="history" id="history"></div>
+    <!-- TÍTULO -->
+    <h1 class="text-4xl font-extrabold text-center uppercase tracking-widest mb-2">
+        Sorteio de Cartas
+    </h1>
+    <p class="text-center text-gray-600 mb-8">
+        Sistema oficial do Torneio de Cartinhas CMIM
+    </p>
+
+    <!-- CARTAS -->
+    <div class="cards-container flex flex-wrap justify-center gap-4 mb-10"></div>
+
+    <!-- RESULTADO -->
+    <div class="bg-gray-100 rounded-xl border p-6 text-center mb-8">
+        <div id="result" class="text-3xl font-bold mb-4">
+            Clique em "Sortear"
+        </div>
+
+        <img id="resultImage"
+             class="hidden mx-auto w-[180px] h-[225px] object-contain border-2 border-yellow-400 rounded-xl shadow-lg cursor-pointer transition hover:scale-110">
+
+        <div id="history" class="text-sm text-gray-500 mt-3"></div>
     </div>
 
-    <div class="controls">
-        <label>
-            <input type="checkbox" id="noRepeat">
+    <!-- CONTROLES -->
+    <div class="text-center space-y-4">
+        <label class="flex justify-center items-center gap-2 text-sm">
+            <input type="checkbox" id="noRepeat" class="accent-yellow-400">
             Não repetir cartas
-        </label><br>
-        <button id="drawButton">Sortear Carta</button>
+        </label>
+
+        <button id="drawButton"
+            class="px-10 py-4 bg-black text-white rounded-full font-bold uppercase tracking-wide
+                   hover:bg-gray-800 hover:-translate-y-1 transition shadow-lg">
+            Sortear Carta
+        </button>
     </div>
+
+    <!-- EXPLICAÇÃO -->
+    <div class="mt-12 bg-gradient-to-br from-yellow-100 to-yellow-50 border border-yellow-400 rounded-xl p-6">
+        <h2 class="text-2xl font-extrabold mb-4 text-center uppercase tracking-wide">
+            📜 Como funciona o Torneio de Cartas
+        </h2>
+
+        <ul class="space-y-3 text-gray-800 text-sm leading-relaxed">
+            <li>🃏 Ao inicio do torneio, cada time recebe 2 cartas, elas podem ser usadas Antes de cada seleção de campeão.</li>
+<li>elas podem ser usadas, uma só vez, além disso, quando chegar na final, cada time ganha +2 cartas, além de cartas de efeitos obrigatórios, não são mais obrigatórias</li>
+<li>Quem escolhe side, joga a carta primeiro!</li>
+            <li>⚔️ Cada carta gera um <strong>efeito obrigatório</strong> dentro ou fora do jogo.</li>
+            <li>🎲 As cartas podem afetar:
+                <ul class="list-disc ml-6 mt-1">
+                    <li>Pick & Ban</li>
+                    <li>Rotas ou funções</li>
+                    <li>Condições especiais (sem flash, invade obrigatória, etc.)</li>
+                </ul>
+            </li>
+            <li>Cartas verdes são <strong>OBRIGADAS</strong> serem usadas durante o torneio.</li>
+	    <li>Cartas Azuis são cartas de  <strong>DEFESA</strong></li>
+            <li>Cartas Vermelhas são cartas de <strong>ATAQUE</strong></li>
+            <li>Cartas Pretas são cartas de efeito <strong>UNIVERSAL</strong> usadas para ambos os times, quando o time que tem posse, usa-la</li>
+            
+        </ul>
+
+        <p class="text-center mt-4 font-bold text-yellow-700">
+            CMIM não é só um torneio. É uma experiência.
+        </p>
+    </div>
+
 </div>
 
 <!-- MODAL -->
-<div class="modal" id="imageModal">
-    <div class="modal-content">
-        <button class="close-modal" id="closeModal">&times;</button>
-        <img class="modal-image" id="modalImage">
+<div id="imageModal"
+     class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+    <div class="relative">
+        <button id="closeModal"
+            class="absolute -top-12 right-0 text-white text-3xl hover:text-yellow-400">
+            &times;
+        </button>
+        <img id="modalImage"
+             class="max-w-[90vw] max-h-[85vh] rounded-2xl border-4 border-yellow-400 shadow-2xl">
     </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-const cardData = [
-    {id:1,name:"Cartinha 01",image:"cartinha 01.png"},
-    {id:2,name:"Cartinha 02",image:"cartinha 02.png"},
-    {id:3,name:"Cartinha 03",image:"cartinha 03.png"},
-    {id:4,name:"Cartinha 04",image:"cartinha 04.png"},
-    {id:5,name:"Cartinha 05",image:"cartinha 05.png"},
-    {id:6,name:"Cartinha 06",image:"cartinha 06.png"},
-    {id:7,name:"Cartinha 07",image:"cartinha 07.png"},
-    {id:8,name:"Cartinha 08",image:"cartinha 08.png"},
-    {id:9,name:"Cartinha 09",image:"cartinha 09.png"},
-    {id:10,name:"Cartinha 10",image:"cartinha 10.png"},
-    {id:11,name:"Cartinha 11",image:"cartinha 11.png"},
-    {id:12,name:"Cartinha 12",image:"cartinha 12.png"},
-    {id:13,name:"Cartinha 13",image:"cartinha 13.png"},
-    {id:14,name:"Cartinha 14",image:"cartinha 14.png"},
-    {id:15,name:"Cartinha 15",image:"cartinha 15.png"},
-    {id:16,name:"Cartinha 16",image:"cartinha 16.png"},
-    {id:17,name:"Cartinha 17",image:"cartinha 17.png"}
-];
+const cardData = Array.from({length:17}, (_,i)=>({
+    id:i+1,
+    name:`Cartinha ${String(i+1).padStart(2,'0')}`,
+    image:`cartinha ${String(i+1).padStart(2,'0')}.png`
+}));
 
 let available = [...cardData];
 let history = [];
@@ -274,12 +162,18 @@ const modalImage = document.getElementById("modalImage");
 
 cardData.forEach(card => {
     const div = document.createElement("div");
-    div.className = "card";
+    div.className =
+        "card-zoom relative w-[120px] h-[150px] bg-white border-2 border-black rounded-xl cursor-pointer transition hover:-translate-y-1 hover:shadow-2xl";
     div.dataset.id = card.id;
+
     div.innerHTML = `
-        <img src="${card.image}" class="card-image">
-        <div class="card-name">${card.name}</div>
+        <img src="${card.image}"
+             class="w-full h-full object-contain rounded-lg">
+        <div class="card-name absolute bottom-1 w-full text-center text-xs bg-white/80">
+            ${card.name}
+        </div>
     `;
+
     cardsContainer.appendChild(div);
 });
 
@@ -289,26 +183,34 @@ document.getElementById("drawButton").onclick = () => {
     const index = Math.floor(Math.random() * available.length);
     const drawn = available.splice(index,1)[0];
 
-    document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
-    document.querySelector(`.card[data-id="${drawn.id}"]`).classList.add("selected");
+    document.querySelectorAll(".card-zoom").forEach(c => {
+        c.classList.remove("border-yellow-400","bg-yellow-100");
+    });
+
+    const selected = document.querySelector(`[data-id="${drawn.id}"]`);
+    selected.classList.add("border-yellow-400","bg-yellow-100");
 
     result.textContent = drawn.name;
-    result.classList.add("highlight");
+    result.classList.add("animate__animated","animate__pulse");
 
     resultImage.src = drawn.image;
-    resultImage.style.display = "block";
+    resultImage.classList.remove("hidden");
 
     history.push(drawn.name);
-    historyDiv.textContent = history.length > 1 ? "Histórico: " + history.slice(0,-1).join(", ") : "";
+    historyDiv.textContent =
+        history.length > 1 ? "Histórico: " + history.slice(0,-1).join(", ") : "";
 };
 
 resultImage.onclick = () => {
     modalImage.src = resultImage.src;
-    modal.style.display = "flex";
+    modal.classList.remove("hidden");
 };
 
-document.getElementById("closeModal").onclick = () => modal.style.display = "none";
-modal.onclick = e => e.target === modal && (modal.style.display = "none");
+document.getElementById("closeModal").onclick = () =>
+    modal.classList.add("hidden");
+
+modal.onclick = e =>
+    e.target === modal && modal.classList.add("hidden");
 
 });
 </script>
